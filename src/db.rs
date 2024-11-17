@@ -1,5 +1,5 @@
 
-use crate::{user::User, Category};
+use crate::{structures::User, Category};
 use rusqlite::{Connection, Result, params};
 
 pub fn insert_user(conn: &Connection, name: &str) -> Result<()> {
