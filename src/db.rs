@@ -2,13 +2,17 @@
 use crate::{structures::User, Category};
 use rusqlite::{Connection, Result, params};
 
-pub fn insert_user(conn: &Connection, name: &str) -> Result<()> {
-	conn.execute(
-		"INSERT INTO users (name) VALUES (?1)",
-		params![name],
-	)?;
-	
-	Ok(())
+pub fn table_insert_with_name(conn: &Connection, name: &str, table: &str) -> Option<i32> {
+	match find_id_by_name(&conn, name, table).unwrap() {
+	    Some(id) => Some(id),
+	    None => {
+			conn.execute(
+				&format!("INSERT INTO {table} (name) VALUES (?1)"),
+				params![name],
+			).ok();
+			find_id_by_name(&conn, name, table).unwrap()
+	    }
+	}
 }
 
 pub fn find_id_by_name(conn: &Connection, name: &str, table: &str) -> Result<Option<i32>> {
@@ -19,15 +23,6 @@ pub fn find_id_by_name(conn: &Connection, name: &str, table: &str) -> Result<Opt
 		return Ok(Some(id));
 	}
 	Ok(None)
-}
-
-pub fn insert_category(conn: &Connection, name: &str, desc: &str) -> Result<()> {
-	conn.execute(
-		"INSERT INTO categories (name, description) VALUES (?1, ?2)",
-		params![name, desc],
-	)?;
-
-	Ok(())
 }
 
 pub fn display_users(conn: &Connection) -> Result<()> {
@@ -56,6 +51,20 @@ pub fn display_categories(conn: &Connection) -> Result<()> {
 	Ok(())
 }
 
+pub fn insert_expense(
+	conn: &Connection,
+	user_id: i32,
+	amount: f32,
+	category_id: i32,
+	desc: String,
+	date: String) -> Result<()> {
+	conn.execute(&format!(
+		"INSERT INTO expenses (amount, date, description, user_id, category_id) VALUES (?1, ?2, ?3, ?4, ?5)"),
+		params![amount, date, desc, user_id, category_id]
+	)?;
+	Ok(())
+}
+
 pub fn initialize_db(conn: &Connection) -> Result<()> {
 	conn.execute(
 		"CREATE TABLE IF NOT EXISTS users (
@@ -68,8 +77,7 @@ pub fn initialize_db(conn: &Connection) -> Result<()> {
 	conn.execute(
 		"CREATE TABLE IF NOT EXISTS categories (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL,
-			description TEXT NOT NULL
+			name TEXT NOT NULL
 		);",
 		[]
 	)?;
