@@ -28,7 +28,8 @@ pub fn get_path() -> Option<std::path::PathBuf> {
 }
 
 fn espense_list_expenses(conn: &Connection) {
-	todo!();
+	let inp_name = get_input("name >> ");
+	display_expenses_with_name(&conn, inp_name).unwrap();
 }
 
 fn espense_add_expense(conn: &Connection) {

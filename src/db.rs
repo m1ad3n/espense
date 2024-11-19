@@ -1,5 +1,5 @@
 
-use crate::{structures::User, Category};
+use crate::{structures::User, Category, Expense};
 use rusqlite::{Connection, Result, params};
 
 pub fn table_insert_with_name(conn: &Connection, name: &str, table: &str) -> Option<i32> {
@@ -62,6 +62,24 @@ pub fn insert_expense(
 		"INSERT INTO expenses (amount, date, description, user_id, category_id) VALUES (?1, ?2, ?3, ?4, ?5)"),
 		params![amount, date, desc, user_id, category_id]
 	)?;
+	Ok(())
+}
+
+pub fn display_expenses_with_name(conn: &Connection, name: String) -> Result<()> {
+	let user_id = match find_id_by_name(&conn, name.as_str(), "users").unwrap() {
+	    Some(v) => v,
+	    None => 0,
+	};
+
+	let mut stmt = conn.prepare("SELECT * FROM expenses WHERE user_id = ?")?;
+	let expense_iter = stmt.query_map([user_id], |row| {
+		Ok(Expense::new(row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?, row.get(4)?, row.get(5)?, row.get(6)?, row.get(7)?))
+	})?;
+
+	for expense in expense_iter {
+		println!("{:#?}", expense.unwrap());
+	}
+
 	Ok(())
 }
 
