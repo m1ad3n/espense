@@ -4,6 +4,7 @@
 
 mod structures;
 mod db;
+mod db_test;
 mod cli;
 
 use structures::*;
@@ -56,7 +57,7 @@ fn espense_menu(conn: &Connection) {
 fn main() -> Result<()> {
 	let db_folder = match get_path() {
 	    Some(path) => path,
-	    None => panic!("couldn't retrive your home path"),
+	    None => panic!("couldn't retrieve your home path"),
 	};
 	let db_file = db_folder.join("data.db").into_os_string();
 

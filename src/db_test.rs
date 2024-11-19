@@ -1,17 +1,19 @@
 
+use std::any;
+
 use crate::db::*;
 use rusqlite::{Connection, Result};
 
 fn setup_test() -> Result<Connection> {
 	let conn = rusqlite::Connection::open_in_memory()?;
 	initialize_db(&conn)?;
-	insert_user(&conn, "Steve")?;
-	insert_user(&conn, "Molly")?;
-	insert_user(&conn, "Jack")?;
-	insert_category(&conn, "food", "")?;
-	insert_category(&conn, "car payments", "")?;
-	insert_category(&conn, "school", "")?;
-	insert_category(&conn, "fun", "")?;
+	table_insert_with_name(&conn, "Steve", "users");
+	table_insert_with_name(&conn, "Molly", "users");
+	table_insert_with_name(&conn, "Jack", "users");
+	table_insert_with_name(&conn, "food", "categories");
+	table_insert_with_name(&conn, "car payments", "categories");
+	table_insert_with_name(&conn, "school", "categories");
+	table_insert_with_name(&conn, "fun", "categories");
 	Ok(conn)
 }
 
@@ -37,13 +39,13 @@ fn find_category_id_test() -> Result<()> {
 #[test]
 fn insert_user_test() -> Result<()> {
 	let conn = setup_test()?;
-	assert_eq!(insert_user(&conn, "Kate"), Ok(()));
+	assert_eq!(table_insert_with_name(&conn, "Kate", "users"), Some(4));
 	Ok(())
 }
 
 #[test]
 fn insert_category_test() -> Result<()> {
 	let conn = setup_test()?;
-	assert_eq!(insert_category(&conn, "Food", "food stuff"), Ok(()));
+	assert_eq!(table_insert_with_name(&conn, "Food", "categories"), Some(5));
 	Ok(())
 }
